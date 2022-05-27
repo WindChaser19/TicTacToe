@@ -1,193 +1,56 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.lang.*;
 import java.util.*;
+import javax.swing.*;
+import java.awt.*;
 
-public class Test {
-
-    public static int[][] grid; // 0 not filled in, 1 = X, 2 = O
-    static int filled;
+public class Test{
 
     public static void main (String [] args) throws IOException {
         System.out.println("Test");
 
-        playGame();
+        JFrame f = new JFrame("Tic Tac Toe");
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setLayout(null);
+        f.setSize(1000,1000);
 
-        System.out.println("Would you like to play again?");
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        JLabel title = new JLabel("Squarme");
+        title.setBounds(20,20, 300, 50);
+        title.setVisible(true);
+        f.add(title);
 
-        String ans = br.readLine();
-        ans.trim();
-        ans.toLowerCase(Locale.ROOT);
-        if(ans.equals("no"))
+        JButton playAI = new JButton();
+        playAI.setText("Play Against AI?");
+        playAI.setBounds(100,700,350,40);
+        playAI.addActionListener( new ActionListener()
         {
-            System.exit(0);
-        }
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                f.dispose();
+                new Game(true);
+            }
+        });
+        f.add(playAI);
 
-    }
-
-    public static void playGame() throws IOException {
-        grid = new int[3][3];
-        filled = 0;
-        boolean done = false;
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        printBoard();
-
-        while(filled < 9 && !done)
+        JButton playVS = new JButton();
+        playVS.setText("Play Against Another Player?");
+        playVS.setBounds(550, 700, 350, 40);
+        playVS.addActionListener(new ActionListener()
         {
-            System.out.println("Enter number from 0 to 8 ");
-            int number = Integer.parseInt(br.readLine());
-            int row = number/3;
-            int col = number%3;
-
-            while(grid[row][col] != 0)
+            @Override
+            public void actionPerformed(ActionEvent e)
             {
-                System.out.println("Enter grid number not filled yet");
-                number = Integer.parseInt(br.readLine());
-                row = number/3;
-                col = number%3;
-
+                f.dispose();
+                new Game(false);
             }
+        });
+        f.add(playVS);
 
-            grid[row][col] = 1;
-
-            if(checkPlayerWin(1))
-            {
-                done = true;
-                System.out.println("Congratulations for win!");
-            }
-            else
-            {
-                randFill();
-                if(checkPlayerWin(2))
-                {
-                    done = true;
-                    System.out.println("Try again next time!");
-                }
-            }
-            printBoard();
-        }
-    }
-
-    public static boolean checkPlayerWin(int player)
-    {
-        return checkRows(player) || checkCols(player) || checkDiags(player);
+        f.setVisible(true);
     }
 
 
-    public static boolean checkRows(int num)
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            boolean rowSame = true;
-            for(int j = 0; j < 3; j++)
-            {
-                if(grid[i][j] != num)
-                {
-                    rowSame = false;
-                }
-            }
-            if(rowSame)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public static boolean checkCols(int num)
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            boolean colSame = true;
-            for(int j = 0; j < 3; j++)
-            {
-                if(grid[j][i] != num)
-                {
-                    colSame = false;
-                }
-            }
-
-            if(colSame)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public static boolean checkDiags(int num)
-    {
-        boolean diaSame = true;
-        boolean offDiaSame = true;
-
-        for(int i = 0; i < 3; i++)
-        {
-            if(grid[i][i] != num)
-            {
-                diaSame = false;
-            }
-            if(grid[i][2-i] != num)
-            {
-                offDiaSame = false;
-            }
-        }
-
-        return diaSame || offDiaSame;
-    }
-
-    public static void randFill()
-    {
-        boolean placed = false;
-
-        if(filled >= 9)
-        {
-            return;
-        }
-        while(!placed)
-        {
-            int rand = (int)(Math.random() * 9);
-            int r = rand/3;
-            int c = rand%3;
-            if(grid[r][c] == 0)
-            {
-                grid[r][c] = 2;
-                placed = true;
-            }
-        }
-    }
-
-    public static void printBoard()
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            for(int j = 0; j < 3; j++)
-            {
-                if(grid[i][j] == 0)
-                {
-                    System.out.print("  ");
-                }
-                else if(grid[i][j] == 1)
-                {
-                    System.out.print("X ");
-                }
-                else
-                {
-                    System.out.print("O ");
-                }
-
-                if(j == 2)
-                {
-                    System.out.println();
-                    System.out.println("-------------");
-                }
-                else
-                {
-                    System.out.print(" | ");
-                }
-            }
-        }
-    }
 
 }
