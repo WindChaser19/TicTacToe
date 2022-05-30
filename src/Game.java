@@ -1,25 +1,36 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.*;
 import java.lang.*;
 import java.util.*;
 import javax.swing.*;
 import java.awt.*;
 
-public class Game implements ActionListener{
+public class Game{
     public static int[][] grid; // 0 not filled in, 1 = X, 2 = O
     static int filled;
-    public static JButton[][] uiGrid;
+    public static JLabel[][] uiGrid;
     public static boolean p1Turn;
     public static boolean gameEnd;
     public static boolean isAI;
 
-    public static JButton nextAI = new JButton();
-    public static JButton nextVS = new JButton();
+    public static JLabel nextAI;
+    public static JLabel nextVS;
 
     public static JLabel label = new JLabel();
 
+    public static ImageIcon O;
+    public static ImageIcon X;
+
     public static JFrame f;
+
+    public static int cellW = 90;
+    public static int cellH = 90;
+
+    public static int titleW = 500;
+    public static int titleH = 100;
 
     public Game(boolean isAI)
     {
@@ -28,56 +39,90 @@ public class Game implements ActionListener{
         f.setLayout(null);
         f.setSize(1000,1000);
 
-        uiGrid = new JButton[3][3];
+        uiGrid = new JLabel[3][3];
         grid = new int[3][3];
 
         filled = 0;
 
-        label.setBounds(20,20, 500, 50);
+        label.setBounds( 500 - titleW/2, titleH/2 + 50, titleW, titleH);
         label.setVisible(false);
         f.add(label);
         this.isAI = isAI;
         p1Turn = true;
         gameEnd = false;
 
+        O = new ImageIcon("O.png");
+        Image oImage = O.getImage();
+        oImage = oImage.getScaledInstance(cellW, cellH, Image.SCALE_SMOOTH);
+        O = new ImageIcon(oImage);
+
+        X = new ImageIcon("X.png");
+        Image xImage = X.getImage();
+        xImage = xImage.getScaledInstance(cellW,cellH, Image.SCALE_SMOOTH);
+        X = new ImageIcon(xImage);
+
         for(int i = 0; i < 3; i++)
         {
             for(int j = 0; j < 3; j++)
             {
-                JButton b = new JButton();
-                b.setBounds(250 + 100*i, 250 + 100*j, 90,90);
-                b.addActionListener(this);
-
+                JLabel b = new JLabel();
+                b.setBounds(325 + (cellH + 10)*i, 300 + (cellW + 10)*j, cellW,cellH);
+                b.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
                 uiGrid[i][j] = b;
+                b.addMouseListener(new MouseAdapter()
+                {
+                    @Override
+                    public void mouseClicked(MouseEvent e)
+                    {
+                        for(int r = 0; r < 3; r++)
+                        {
+                            for(int c = 0; c < 3; c++)
+                            {
+                                if(e.getSource() == uiGrid[r][c])
+                                {
+                                    updateButton(r,c);
+                                }
+                            }
+                        }
+                    }
+                });
 
                 f.add(uiGrid[i][j]);
             }
         }
 
-        nextAI.setBounds(100, 650, 350, 40);
-        nextAI.addActionListener(new ActionListener() {
+        ImageIcon playAINext = new ImageIcon("Play_Again_AI.png");
+        Image playAINextImage= playAINext.getImage();
+        playAINextImage = playAINextImage.getScaledInstance(350, 65, Image.SCALE_SMOOTH);
+        playAINext = new ImageIcon(playAINextImage);
+        nextAI = new JLabel(playAINext);
+        nextAI.setBounds(75, 700, 350, 65);
+        nextAI.addMouseListener(new MouseAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                //clearBoard();
+            public void mouseClicked(MouseEvent e)
+            {
                 f.dispose();
                 new Game(true);
             }
         });
-        nextAI.setText("Play Again VS AI?");
         nextAI.setVisible(false);
 
         f.add(nextAI);
 
-        nextVS.setBounds(550, 650, 350, 40);
-        nextVS.addActionListener(new ActionListener() {
+
+        ImageIcon playPlayerNext = new ImageIcon("Play_Again_Player.png");
+        Image playPlayerNextImage = playPlayerNext.getImage();
+        playPlayerNextImage = playPlayerNextImage.getScaledInstance(400, 65, Image.SCALE_SMOOTH);
+        playPlayerNext = new ImageIcon(playPlayerNextImage);
+        nextVS = new JLabel(playPlayerNext);
+        nextVS.setBounds(525, 700, 400, 65);
+        nextVS.addMouseListener(new MouseAdapter() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                //clearBoard();
+            public void mouseClicked(MouseEvent e) {
                 f.dispose();
                 new Game(false);
             }
         });
-        nextVS.setText("Play Again VS Another Player?");
         nextVS.setVisible(false);
 
         f.add(nextVS);
@@ -97,32 +142,6 @@ public class Game implements ActionListener{
         }
     }
 
-
-    public static void clearBoard()
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            for(int j = 0; j < 3; j++)
-            {
-                uiGrid[i][j].setText("");
-                grid[i][j] = 0;
-            }
-        }
-    }
-    public void actionPerformed(ActionEvent e)
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            for(int j = 0; j < 3; j++)
-            {
-                if(e.getSource() == uiGrid[i][j])
-                {
-                    updateButton(i,j);
-                }
-            }
-        }
-    }
-
     public static void updateButton(int i, int j)
     {
         if(grid[i][j] != 0)
@@ -133,12 +152,12 @@ public class Game implements ActionListener{
 
         if(p1Turn)
         {
-            uiGrid[i][j].setText("X");
+            uiGrid[i][j].setIcon(X);
             grid[i][j] = 1;
         }
         else
         {
-            uiGrid[i][j].setText("O");
+            uiGrid[i][j].setIcon(O);
             grid[i][j] = 2;
         }
 
@@ -167,23 +186,28 @@ public class Game implements ActionListener{
 
         if(checkPlayerWin(1))
         {
-            label.setText("Player 1 Wins!");
+            ImageIcon p1Win = new ImageIcon("One_Wins.png");
+            Image p1WinImage = p1Win.getImage();
+            p1WinImage = p1WinImage.getScaledInstance(titleW, titleH, Image.SCALE_SMOOTH);
+            p1Win = new ImageIcon(p1WinImage);
+            label.setIcon(p1Win);
             label.setVisible(true);
-            System.out.println("Congrats for Winning!");
             needEnd = true;
         }
         else if(checkPlayerWin(2))
         {
-            label.setText("Player 2 Wins!");
+            ImageIcon p2Win = new ImageIcon("Two_Wins.png");
+            Image p2WinImage = p2Win.getImage();
+            p2WinImage = p2WinImage.getScaledInstance(titleW, titleH, Image.SCALE_SMOOTH);
+            p2Win = new ImageIcon(p2WinImage);
+            label.setIcon(p2Win);
             label.setVisible(true);
-            System.out.println("Try again next time");
             needEnd = true;
         }
         else if(filled == 9)
         {
             label.setText("Draw");
             label.setVisible(true);
-            System.out.println("Game over");
             needEnd = true;
         }
 
@@ -281,7 +305,7 @@ public class Game implements ActionListener{
             if(grid[r][c] == 0)
             {
                 grid[r][c] = 2;
-                uiGrid[r][c].setText("O");
+                uiGrid[r][c].setIcon(O);
                 grid[r][c] = 2;
                 placed = true;
             }
