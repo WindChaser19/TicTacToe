@@ -206,7 +206,11 @@ public class Game{
         }
         else if(filled == 9)
         {
-            label.setText("Draw");
+            ImageIcon draw = new ImageIcon("Draw.png");
+            Image drawImage = draw.getImage();
+            drawImage = drawImage.getScaledInstance(titleW,titleH, Image.SCALE_SMOOTH);
+            draw = new ImageIcon(drawImage);
+            label.setIcon(draw);
             label.setVisible(true);
             needEnd = true;
         }
